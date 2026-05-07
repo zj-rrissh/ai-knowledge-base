@@ -1,0 +1,77 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: kb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      LLM_API_KEY: ${LLM_API_KEY}
+      EMBED_PROVIDER: ${EMBED_PROVIDER:-openai}
+      EMBED_MODEL: ${EMBED_MODEL:-text-embedding-3-small}
+      EMBED_API_KEY: ${EMBED_API_KEY}
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: "8000"
+    depends_on:
+      - chromadb
+
+  springboot:
+    build: ./springboot
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/kb?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATA_REDIS_HOST: redis
+      APP_FASTAPI_BASE_URL: http://fastapi:8000
+      JWT_SECRET: ${JWT_SECRET:-prod-jwt-secret-change-me}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      fastapi:
+        condition: service_started
+
+  nginx:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - springboot
+
+volumes:
+  mysql_data:
+  chroma_data:
