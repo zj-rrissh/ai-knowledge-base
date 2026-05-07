@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 
 LLM_PROVIDER_MAP: dict[str, str] = {
-    "deepseek": "https://api.deepseek.com",
+    "deepseek": "https://api.deepseek.com/v1",
     "openai": "https://api.openai.com/v1",
     "zhipu": "https://open.bigmodel.cn/api/paas/v4",
     "qwen": "https://dashscope.aliyuncs.com/compatible-mode/v1",
