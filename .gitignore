@@ -21,3 +21,6 @@ Thumbs.db
 
 # Env
 .env
+
+# Local notes
+docs/
