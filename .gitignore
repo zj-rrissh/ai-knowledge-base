@@ -1,3 +1,23 @@
+# Python
 __pycache__/
 .venv/
 *.pyc
+
+# Maven
+springboot/target/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
