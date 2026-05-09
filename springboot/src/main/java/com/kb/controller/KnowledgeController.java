@@ -1,5 +1,6 @@
 package com.kb.controller;
 
+import com.kb.model.dto.DocumentResponse;
 import com.kb.model.entity.Document;
 import com.kb.service.KnowledgeService;
 import org.springframework.data.domain.Page;
@@ -22,13 +23,16 @@ public class KnowledgeController {
 
     @PostMapping("/documents")
     public ResponseEntity<Document> upload(@RequestParam("file") MultipartFile file,
+                                           @RequestParam(required = false) String title,
+                                           @RequestParam(required = false) String description,
+                                           @RequestParam(required = false) String tags,
                                            Authentication auth) throws IOException {
         Long userId = Long.parseLong(auth.getPrincipal().toString());
-        return ResponseEntity.ok(knowledgeService.upload(file, userId));
+        return ResponseEntity.ok(knowledgeService.upload(file, title, description, tags, userId));
     }
 
     @GetMapping("/documents")
-    public ResponseEntity<Page<Document>> list(
+    public ResponseEntity<Page<DocumentResponse>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication auth) {

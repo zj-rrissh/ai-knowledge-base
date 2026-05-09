@@ -1,9 +1,12 @@
 package com.kb.service;
 
 import com.kb.client.FastApiClient;
+import com.kb.model.dto.DocumentResponse;
 import com.kb.model.entity.Document;
 import com.kb.model.entity.Document.DocStatus;
+import com.kb.model.entity.User;
 import com.kb.repository.DocumentRepository;
+import com.kb.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,17 +18,20 @@ import java.util.Map;
 @Service
 public class KnowledgeService {
     private final DocumentRepository docRepo;
+    private final UserRepository userRepo;
     private final FileStorageService fileStorage;
     private final FastApiClient fastApiClient;
 
-    public KnowledgeService(DocumentRepository docRepo, FileStorageService fileStorage,
-                            FastApiClient fastApiClient) {
+    public KnowledgeService(DocumentRepository docRepo, UserRepository userRepo,
+                            FileStorageService fileStorage, FastApiClient fastApiClient) {
         this.docRepo = docRepo;
+        this.userRepo = userRepo;
         this.fileStorage = fileStorage;
         this.fastApiClient = fastApiClient;
     }
 
-    public Document upload(MultipartFile file, Long userId) throws IOException {
+    public Document upload(MultipartFile file, String title, String description,
+                           String tags, Long userId) throws IOException {
         String filePath = fileStorage.store(file, userId);
         Document doc = new Document();
         doc.setFilename(file.getOriginalFilename());
@@ -33,6 +39,9 @@ public class KnowledgeService {
         doc.setFileSize(file.getSize());
         doc.setFileType(file.getContentType());
         doc.setUserId(userId);
+        doc.setTitle(title != null ? title : file.getOriginalFilename());
+        doc.setDescription(description);
+        doc.setTags(tags);
         doc.setStatus(DocStatus.indexing);
         doc = docRepo.save(doc);
 
@@ -50,12 +59,20 @@ public class KnowledgeService {
         return docRepo.save(doc);
     }
 
-    public Page<Document> list(Long userId, int page, int size) {
-        return docRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+    public Page<DocumentResponse> list(Long userId, int page, int size) {
+        Page<Document> docs = docRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+        return docs.map(doc -> {
+            User user = userRepo.findById(doc.getUserId()).orElse(null);
+            String uploaderName = user != null ? user.getUsername() : "未知";
+            return new DocumentResponse(doc, uploaderName);
+        });
     }
 
     public void delete(Long id, Long userId) throws IOException {
         Document doc = docRepo.findById(id).orElseThrow();
+        if (!doc.getUserId().equals(userId)) {
+            throw new RuntimeException("无权删除该文档");
+        }
         fileStorage.delete(doc.getFilePath());
         docRepo.delete(doc);
     }

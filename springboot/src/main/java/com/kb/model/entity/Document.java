@@ -34,6 +34,9 @@ public class Document {
     @Column(name = "chunk_count")
     private Integer chunkCount = 0;
 
+    @Column(length = 200)
+    private String title;
+
     @Column(length = 500)
     private String description;
 
