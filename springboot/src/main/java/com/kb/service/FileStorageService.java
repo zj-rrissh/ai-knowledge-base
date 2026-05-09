@@ -21,6 +21,8 @@ public class FileStorageService {
             "text/plain"
     );
 
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".pdf", ".docx", ".md", ".txt");
+
     public FileStorageService(@Value("${app.upload.dir}") String uploadDir) throws IOException {
         this.baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();
         Files.createDirectories(this.baseDir);
@@ -28,8 +30,12 @@ public class FileStorageService {
 
     public String store(MultipartFile file, Long userId) throws IOException {
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
-            throw new IllegalArgumentException("不支持的文件类型: " + contentType);
+        boolean allowed = contentType != null && ALLOWED_TYPES.contains(contentType);
+        if (!allowed) {
+            String ext = getExtension(file.getOriginalFilename());
+            if (ext.isEmpty() || !ALLOWED_EXTENSIONS.contains(ext)) {
+                throw new IllegalArgumentException("不支持的文件类型: " + contentType + " (ext: " + ext + ")");
+            }
         }
 
         Path userDir = baseDir.resolve(userId.toString());
