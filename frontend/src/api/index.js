@@ -28,7 +28,16 @@ export const auth = {
 }
 
 export const knowledge = {
-  upload: (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/knowledge/documents', fd) },
+  upload: (file, title, description, tags) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    if (title) fd.append('title', title)
+    if (description) fd.append('description', description)
+    if (tags) fd.append('tags', tags)
+    return api.post('/knowledge/documents', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   list: (page = 0, size = 20) => api.get('/knowledge/documents', { params: { page, size } }),
   delete: (id) => api.delete(`/knowledge/documents/${id}`),
 }
