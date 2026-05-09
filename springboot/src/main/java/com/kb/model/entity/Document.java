@@ -21,7 +21,7 @@ public class Document {
     @Column(name = "file_size")
     private Long fileSize;
 
-    @Column(name = "file_type", length = 20)
+    @Column(name = "file_type", length = 100)
     private String fileType;
 
     @Column(name = "user_id", nullable = false)

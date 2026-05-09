@@ -37,7 +37,7 @@ public class KnowledgeService {
         doc.setFilename(file.getOriginalFilename());
         doc.setFilePath(filePath);
         doc.setFileSize(file.getSize());
-        doc.setFileType(file.getContentType());
+        doc.setFileType(normalizeContentType(file.getContentType(), file.getOriginalFilename()));
         doc.setUserId(userId);
         doc.setTitle(title != null ? title : file.getOriginalFilename());
         doc.setDescription(description);
@@ -73,5 +73,28 @@ public class KnowledgeService {
         }
         fileStorage.delete(doc.getFilePath());
         docRepo.delete(doc);
+    }
+
+    private String normalizeContentType(String contentType, String filename) {
+        if (contentType != null && !"application/octet-stream".equals(contentType)) {
+            return contentType;
+        }
+        if (filename == null) {
+            return contentType;
+        }
+        String lowerName = filename.toLowerCase();
+        if (lowerName.endsWith(".pdf")) {
+            return "application/pdf";
+        }
+        if (lowerName.endsWith(".docx")) {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
+        if (lowerName.endsWith(".md")) {
+            return "text/markdown";
+        }
+        if (lowerName.endsWith(".txt")) {
+            return "text/plain";
+        }
+        return contentType;
     }
 }
