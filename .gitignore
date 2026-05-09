@@ -24,3 +24,8 @@ Thumbs.db
 
 # Local notes
 docs/
+
+# Runtime data
+fastapi/chroma_data/
+test-files/
+uploads/
