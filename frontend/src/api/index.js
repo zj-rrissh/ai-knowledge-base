@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: '/api',
   timeout: 30000,
 })
 
@@ -14,7 +14,7 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   err => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 || err.response?.status === 403) {
       localStorage.removeItem('token')
       window.location.href = '/login'
     }
@@ -37,7 +37,15 @@ export const chat = {
   createSession: (title) => api.post('/chat/sessions', { title }),
   listSessions: () => api.get('/chat/sessions'),
   deleteSession: (id) => api.delete(`/chat/sessions/${id}`),
-  sendMessage: (sessionId, query) => api.post(`/chat/sessions/${sessionId}/messages`, { query }),
+  sendMessage: (sessionId, query, fileIds) => api.post(`/chat/sessions/${sessionId}/messages`, { query, fileIds }),
+  sendMessageWithFiles: (sessionId, query, files) => {
+    const fd = new FormData()
+    fd.append('query', query)
+    files.forEach((f) => fd.append('files', f))
+    return api.post(`/chat/sessions/${sessionId}/messages`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   listMessages: (sessionId) => api.get(`/chat/sessions/${sessionId}/messages`),
 }
 

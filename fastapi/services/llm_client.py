@@ -25,7 +25,7 @@ class OpenAILikeLLMClient(BaseLLMClient):
             ],
             temperature=kwargs.get("temperature", 0.1),
         )
-        return response.choices[0].message.content
+        return response.choices[0].message.content  # type: ignore
 
 
 def get_llm_client() -> BaseLLMClient:

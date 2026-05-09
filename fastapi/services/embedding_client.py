@@ -30,8 +30,9 @@ class OpenAIEmbeddingClient(BaseEmbeddingClient):
 
 def get_embedding_client() -> BaseEmbeddingClient:
     base_url = settings.embed_base_url or EMBED_PROVIDER_MAP.get(settings.embed_provider, "")
+    api_key = settings.embed_api_key or "ollama"  # Ollama 不需要真实 key，但不能为空（httpx>=0.28 拒绝空 Bearer token）
     return OpenAIEmbeddingClient(
         model=settings.embed_model,
-        api_key=settings.embed_api_key,
+        api_key=api_key,
         base_url=base_url,
     )

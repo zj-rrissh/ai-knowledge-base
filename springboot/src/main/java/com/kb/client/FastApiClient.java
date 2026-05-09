@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -18,13 +19,20 @@ public class FastApiClient {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> ingest(String filePath, Long documentId, Long userId) {
-        var body = Map.of("file_path", filePath, "document_id", documentId, "user_id", userId);
+        Map<String, Object> body = new HashMap<>();
+        body.put("file_path", filePath);
+        body.put("document_id", documentId);
+        body.put("user_id", userId);
         return restTemplate.postForObject(baseUrl + "/ingest", body, Map.class);
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> chat(String sessionId, String query, Long userId, int topK) {
-        var body = Map.of("session_id", sessionId, "query", query, "user_id", userId, "top_k", topK);
+        Map<String, Object> body = new HashMap<>();
+        body.put("session_id", sessionId);
+        body.put("query", query);
+        body.put("user_id", userId);
+        body.put("top_k", topK);
         return restTemplate.postForObject(baseUrl + "/chat", body, Map.class);
     }
 
