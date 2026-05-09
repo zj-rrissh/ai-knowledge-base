@@ -1,4 +1,4 @@
-# AI Knowledge Base
+# AI Knowledge Base (demo)
 
 基于 RAG（检索增强生成）的智能知识库系统，支持文档管理、向量检索和 AI 对话问答。
 
