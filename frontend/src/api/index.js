@@ -34,9 +34,7 @@ export const knowledge = {
     if (title) fd.append('title', title)
     if (description) fd.append('description', description)
     if (tags) fd.append('tags', tags)
-    return api.post('/knowledge/documents', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    return api.post('/knowledge/documents', fd)
   },
   list: (page = 0, size = 20) => api.get('/knowledge/documents', { params: { page, size } }),
   delete: (id) => api.delete(`/knowledge/documents/${id}`),

@@ -36,6 +36,7 @@
                 type="text"
                 placeholder="输入文档标题..."
                 required
+                maxlength="200"
                 class="form-input"
               />
             </div>
@@ -46,6 +47,7 @@
                 v-model="form.description"
                 placeholder="简要描述文档内容..."
                 rows="2"
+                maxlength="500"
                 class="form-textarea"
               ></textarea>
             </div>
@@ -56,6 +58,7 @@
                 v-model="form.tags"
                 type="text"
                 placeholder="逗号分隔，如：技术,Python"
+                maxlength="500"
                 class="form-input"
               />
             </div>
@@ -236,7 +239,7 @@ async function handleDelete(id) {
     await knowledge.delete(id)
     await loadDocs()
   } catch {
-    // ignore
+    alert('删除失败，请重试')
   } finally {
     deleting.value = null
   }

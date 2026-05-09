@@ -61,11 +61,9 @@ public class KnowledgeService {
 
     public Page<DocumentResponse> list(Long userId, int page, int size) {
         Page<Document> docs = docRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
-        return docs.map(doc -> {
-            User user = userRepo.findById(doc.getUserId()).orElse(null);
-            String uploaderName = user != null ? user.getUsername() : "未知";
-            return new DocumentResponse(doc, uploaderName);
-        });
+        User user = userRepo.findById(userId).orElse(null);
+        String uploaderName = user != null ? user.getUsername() : "未知";
+        return docs.map(doc -> new DocumentResponse(doc, uploaderName));
     }
 
     public void delete(Long id, Long userId) throws IOException {
