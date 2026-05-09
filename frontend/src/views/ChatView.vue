@@ -175,7 +175,7 @@
             <span>上传文档</span>
             <input
               type="file"
-              accept=".pdf,.docx,.md,.txt,.doc,.xlsx,.pptx"
+              accept=".pdf,.md,.txt,.xlsx,.pptx"
               multiple
               hidden
               @change="handleFileSelect"

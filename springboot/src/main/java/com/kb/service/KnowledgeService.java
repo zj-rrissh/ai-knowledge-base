@@ -86,9 +86,6 @@ public class KnowledgeService {
         if (lowerName.endsWith(".pdf")) {
             return "application/pdf";
         }
-        if (lowerName.endsWith(".docx")) {
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        }
         if (lowerName.endsWith(".md")) {
             return "text/markdown";
         }

@@ -16,12 +16,11 @@ public class FileStorageService {
     private final Path baseDir;
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "application/pdf",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "text/markdown",
             "text/plain"
     );
 
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".pdf", ".docx", ".md", ".txt");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".pdf", ".md", ".txt");
 
     public FileStorageService(@Value("${app.upload.dir}") String uploadDir) throws IOException {
         this.baseDir = Paths.get(uploadDir).toAbsolutePath().normalize();

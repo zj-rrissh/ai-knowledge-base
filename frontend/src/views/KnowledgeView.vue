@@ -68,7 +68,7 @@
                 <input
                   ref="fileInput"
                   type="file"
-                  accept=".pdf,.docx,.md,.txt"
+                  accept=".pdf,.md,.txt"
                   @change="onFileChange"
                   class="file-input-hidden"
                 />
@@ -80,7 +80,7 @@
                 </button>
                 <span v-if="selectedFile" class="file-size">{{ formatSize(selectedFile.size) }}</span>
                 <button v-if="selectedFile" type="button" @click="clearFile" class="file-clear">&times;</button>
-                <span v-else class="file-hint">支持 PDF、DOCX、Markdown、TXT</span>
+                <span v-else class="file-hint">支持 PDF、Markdown、TXT</span>
               </div>
             </div>
           </div>
