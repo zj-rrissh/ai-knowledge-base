@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 5000ms
+
+app:
+  jwt:
+    secret: test-secret-key-for-junit-testing-only-12345678
+    access-expiration: 7200000
+    refresh-expiration: 604800000
+  upload:
+    dir: ./target/test-uploads
+  fastapi:
+    base-url: http://localhost:8000
