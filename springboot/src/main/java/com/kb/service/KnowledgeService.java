@@ -72,6 +72,7 @@ public class KnowledgeService {
             throw new RuntimeException("无权删除该文档");
         }
         fileStorage.delete(doc.getFilePath());
+        fastApiClient.deleteChunks(id, userId);
         docRepo.delete(doc);
     }
 

@@ -37,6 +37,7 @@ public class FastApiClient {
     }
 
     public void deleteChunks(Long documentId, Long userId) {
-        // Reserve for future chunk-level deletion via FastAPI
+        String url = baseUrl + "/ingest/" + documentId + "?user_id=" + userId;
+        restTemplate.delete(url);
     }
 }
