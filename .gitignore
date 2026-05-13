@@ -25,6 +25,10 @@ Thumbs.db
 # Local notes
 docs/
 
+# Coverage
+fastapi/.coverage
+frontend/coverage/
+
 # Runtime data
 fastapi/chroma_data/
 test-files/
