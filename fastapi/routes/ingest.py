@@ -13,6 +13,7 @@ def ingest(req: IngestRequest):
         file_path=req.file_path,
         document_id=req.document_id,
         user_id=req.user_id,
+        metadata=req.metadata or None,
     )
     return IngestResponse(
         document_id=req.document_id,

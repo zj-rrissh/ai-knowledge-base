@@ -16,10 +16,13 @@ def _get_client() -> ClientAPI:
 
 
 def get_collection(user_id: int = 1):
-    """获取用户专属 collection，不存在则创建"""
+    """获取用户专属 collection，不存在则创建（使用 cosine 距离）"""
     client = _get_client()
     name = f"kb_{user_id}"
-    return client.get_or_create_collection(name=name)
+    return client.get_or_create_collection(
+        name=name,
+        metadata={"hnsw:space": "cosine"},
+    )
 
 
 def add_chunks(

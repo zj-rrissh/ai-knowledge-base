@@ -17,6 +17,13 @@
           </svg>
           <span>新对话</span>
         </button>
+        <router-link v-show="sidebarOpen" to="/knowledge" class="nav-kb-btn" title="知识库">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span>知识库</span>
+        </router-link>
       </div>
 
       <div v-show="sidebarOpen" class="session-list">
@@ -56,6 +63,12 @@
             <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
+        <router-link to="/knowledge" class="collapsed-nav-btn" title="知识库">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </router-link>
       </div>
     </aside>
 
@@ -436,6 +449,30 @@ async function handleDeleteSession(id) {
   border-color: #6366f1;
 }
 
+.nav-kb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #334155;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.nav-kb-btn:hover {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
 /* 会话列表 */
 .session-list {
   flex: 1;
@@ -540,6 +577,27 @@ async function handleDeleteSession(id) {
   transition: all 0.15s;
 }
 .collapsed-new-chat:hover {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.collapsed-nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: white;
+  color: #334155;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.collapsed-nav-btn:hover {
   background: #6366f1;
   color: white;
   border-color: #6366f1;

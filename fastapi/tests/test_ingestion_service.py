@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
+from chunking.strategy import Chunk
 from services.ingestion_service import ingest_document
 
 
@@ -18,27 +19,20 @@ class TestIngestDocument:
             ),
             patch("services.ingestion_service.add_chunks") as mock_add,
             patch("services.ingestion_service.SimpleDirectoryReader") as mock_reader,
-            patch(
-                "services.ingestion_service.SentenceSplitter"
-            ) as mock_splitter_class,
+            patch("services.ingestion_service.get_strategy") as mock_get_strategy,
         ):
-            # Mock reader
             mock_doc = MagicMock()
             mock_doc.get_content.return_value = "full document content"
             mock_reader_instance = MagicMock()
             mock_reader_instance.load_data.return_value = [mock_doc]
             mock_reader.return_value = mock_reader_instance
 
-            # Mock splitter
-            mock_node1 = MagicMock()
-            mock_node1.get_content.return_value = "chunk 1 content"
-            mock_node2 = MagicMock()
-            mock_node2.get_content.return_value = "chunk 2 content"
-            splitter_instance = mock_splitter_class.return_value
-            splitter_instance.get_nodes_from_documents.return_value = [
-                mock_node1,
-                mock_node2,
+            mock_strategy = MagicMock()
+            mock_strategy.chunk.return_value = [
+                Chunk(text="chunk 1 content", metadata={"document_id": "42", "source": "/data/test.txt"}),
+                Chunk(text="chunk 2 content", metadata={"document_id": "42", "source": "/data/test.txt"}),
             ]
+            mock_get_strategy.return_value = mock_strategy
 
             result = ingest_document(
                 file_path="/data/test.txt", document_id=42, user_id=1
@@ -58,7 +52,7 @@ class TestIngestDocument:
             ),
             patch("services.ingestion_service.add_chunks") as mock_add,
             patch("services.ingestion_service.SimpleDirectoryReader") as mock_reader,
-            patch("services.ingestion_service.SentenceSplitter") as mock_splitter_cls,
+            patch("services.ingestion_service.get_strategy") as mock_get_strategy,
         ):
             mock_doc = MagicMock()
             mock_doc.get_content.return_value = "content"
@@ -66,10 +60,11 @@ class TestIngestDocument:
             mock_reader_instance.load_data.return_value = [mock_doc]
             mock_reader.return_value = mock_reader_instance
 
-            mock_node = MagicMock()
-            mock_node.get_content.return_value = "chunk"
-            splitter = mock_splitter_cls.return_value
-            splitter.get_nodes_from_documents.return_value = [mock_node]
+            mock_strategy = MagicMock()
+            mock_strategy.chunk.return_value = [
+                Chunk(text="chunk", metadata={"document_id": "99", "source": "/data/doc.txt"}),
+            ]
+            mock_get_strategy.return_value = mock_strategy
 
             ingest_document(file_path="/data/doc.txt", document_id=99, user_id=1)
 
@@ -88,7 +83,7 @@ class TestIngestDocument:
             ),
             patch("services.ingestion_service.add_chunks") as mock_add,
             patch("services.ingestion_service.SimpleDirectoryReader") as mock_reader,
-            patch("services.ingestion_service.SentenceSplitter") as mock_splitter_cls,
+            patch("services.ingestion_service.get_strategy") as mock_get_strategy,
         ):
             mock_doc = MagicMock()
             mock_doc.get_content.return_value = "content"
@@ -96,10 +91,11 @@ class TestIngestDocument:
             mock_reader_instance.load_data.return_value = [mock_doc]
             mock_reader.return_value = mock_reader_instance
 
-            mock_node = MagicMock()
-            mock_node.get_content.return_value = "chunk"
-            splitter = mock_splitter_cls.return_value
-            splitter.get_nodes_from_documents.return_value = [mock_node]
+            mock_strategy = MagicMock()
+            mock_strategy.chunk.return_value = [
+                Chunk(text="chunk", metadata={"document_id": "77", "source": "/data/doc.pdf"}),
+            ]
+            mock_get_strategy.return_value = mock_strategy
 
             ingest_document(file_path="/data/doc.pdf", document_id=77, user_id=2)
 
@@ -108,6 +104,37 @@ class TestIngestDocument:
             assert metadatas[0]["document_id"] == "77"
             assert metadatas[0]["source"] == "/data/doc.pdf"
             assert metadatas[0]["chunk_index"] == "0"
+
+    def test_metadata_passed_to_strategy(self, mock_settings):
+        mock_embed = MagicMock()
+        mock_embed.embed.return_value = [[0.1] * 1536]
+
+        with (
+            patch("services.ingestion_service.get_embedding_client", return_value=mock_embed),
+            patch("services.ingestion_service.add_chunks"),
+            patch("services.ingestion_service.SimpleDirectoryReader") as mock_reader,
+            patch("services.ingestion_service.get_strategy") as mock_get_strategy,
+        ):
+            mock_doc = MagicMock()
+            mock_doc.get_content.return_value = "content"
+            mock_reader.return_value.load_data.return_value = [mock_doc]
+
+            mock_strategy = MagicMock()
+            mock_strategy.chunk.return_value = [
+                Chunk(text="chunk", metadata={}),
+            ]
+            mock_get_strategy.return_value = mock_strategy
+
+            ingest_document(
+                file_path="/data/doc.pdf",
+                document_id=1,
+                user_id=1,
+                metadata={"content_type": "application/pdf"},
+            )
+
+            mock_get_strategy.assert_called_once_with(
+                "/data/doc.pdf", {"content_type": "application/pdf"}
+            )
 
     def test_empty_document_returns_failed(self, mock_settings):
         with patch("services.ingestion_service.SimpleDirectoryReader") as mock_reader:
