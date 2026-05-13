@@ -63,20 +63,28 @@ def mock_openai_client():
 
 @pytest.fixture
 def mock_llm_client():
-    """Mock services.llm_client.get_llm_client，返回受控的 BaseLLMClient。"""
+    """Mock get_llm_client 在所有引用点，返回受控的 BaseLLMClient。"""
     mock = MagicMock()
     mock.chat.return_value = "Mocked LLM response"
-    with patch("services.llm_client.get_llm_client", return_value=mock):
+    with (
+        patch("services.llm_client.get_llm_client", return_value=mock),
+        patch("services.rag_service.get_llm_client", return_value=mock),
+        patch("routes.health.get_llm_client", return_value=mock),
+    ):
         yield mock
 
 
 @pytest.fixture
 def mock_embedding_client():
-    """Mock services.embedding_client.get_embedding_client，返回受控的 embedding client。"""
+    """Mock get_embedding_client 在所有引用点，返回受控的 embedding client。"""
     mock = MagicMock()
     mock.embed.return_value = [[0.1] * 1536, [0.2] * 1536]
     mock.embed_query.return_value = [0.1] * 1536
-    with patch("services.embedding_client.get_embedding_client", return_value=mock):
+    with (
+        patch("services.embedding_client.get_embedding_client", return_value=mock),
+        patch("services.rag_service.get_embedding_client", return_value=mock),
+        patch("services.ingestion_service.get_embedding_client", return_value=mock),
+    ):
         yield mock
 
 
