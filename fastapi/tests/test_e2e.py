@@ -26,10 +26,10 @@ def test_ingest_invalid_file():
 
 
 def test_chat_empty_knowledge_base():
-    """空知识库查询应返回无参考资料"""
+    """无匹配文档时查询应返回无参考资料"""
     response = client.post("/chat", json={
         "session_id": "test-session-1",
-        "query": "公司考勤制度是什么？",
+        "query": "abc123xyz_unmatchable_query_foobar",
     })
     assert response.status_code == 200
     data = response.json()

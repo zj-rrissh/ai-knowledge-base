@@ -21,31 +21,31 @@ class TestGetClient:
         vs._client = None
 
     def test_lazy_initialization(self):
-        with patch("services.vector_store.chromadb.PersistentClient") as mock_pc:
+        with patch("services.vector_store.chromadb.HttpClient") as mock_hc:
             vs._client = None
             client = _get_client()
             assert client is not None
-            mock_pc.assert_called_once()
+            mock_hc.assert_called_once()
 
     def test_singleton_behaviour(self):
-        with patch("services.vector_store.chromadb.PersistentClient") as mock_pc:
+        with patch("services.vector_store.chromadb.HttpClient") as mock_hc:
             vs._client = None
             client1 = _get_client()
             client2 = _get_client()
             assert client1 is client2
-            mock_pc.assert_called_once()
+            mock_hc.assert_called_once()
 
-    def test_passes_correct_path(self):
+    def test_passes_correct_host_and_port(self):
         with patch(
-            "services.vector_store.chromadb.PersistentClient"
-        ) as mock_pc, patch(
-            "services.vector_store.settings.chroma_persist_dir", "./custom_path"
+            "services.vector_store.chromadb.HttpClient"
+        ) as mock_hc, patch(
+            "services.vector_store.settings.chroma_host", "test_host"
+        ), patch(
+            "services.vector_store.settings.chroma_port", 9999
         ):
             vs._client = None
             _get_client()
-            mock_pc.assert_called_once()
-            kwargs = mock_pc.call_args[1]
-            assert "path" in kwargs
+            mock_hc.assert_called_once_with(host="test_host", port=9999)
 
 
 class TestGetCollection:

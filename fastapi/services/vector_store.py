@@ -1,6 +1,5 @@
 import chromadb
 from chromadb.api import ClientAPI
-from chromadb.config import Settings as ChromaSettings
 from config import settings
 
 _client = None
@@ -9,9 +8,9 @@ _client = None
 def _get_client() -> ClientAPI:
     global _client
     if _client is None:
-        _client = chromadb.PersistentClient(
-            path=settings.chroma_persist_dir,
-            settings=ChromaSettings(anonymized_telemetry=False),
+        _client = chromadb.HttpClient(
+            host=settings.chroma_host,
+            port=settings.chroma_port,
         )
     return _client
 
@@ -61,6 +60,18 @@ def query_chunks(
 def delete_chunks(user_id: int, chunk_ids: list[str]):
     collection = get_collection(user_id)
     collection.delete(ids=chunk_ids)
+
+
+def delete_document_chunks(user_id: int, document_id: int) -> int:
+    collection = get_collection(user_id)
+    results = collection.get(
+        where={"document_id": str(document_id)},
+        include=[],
+    )
+    ids = results["ids"]
+    if ids:
+        collection.delete(ids=ids)
+    return len(ids)
 
 
 def health_check() -> bool:

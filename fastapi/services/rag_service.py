@@ -12,11 +12,13 @@ def _load_prompt(name: str = "default") -> str:
         return f.read()
 
 
-def generate_answer(query: str, user_id: int = 1, top_k: int = 4) -> ChatResponse:
+def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
+                    min_score: float = 0.2) -> ChatResponse:
     embed_client = get_embedding_client()
     query_embedding = embed_client.embed_query(query)
 
     chunks = query_chunks(user_id=user_id, query_embedding=query_embedding, top_k=top_k)
+    chunks = [c for c in chunks if 1.0 - c.get("distance", 0) >= min_score]
 
     if not chunks:
         return ChatResponse(

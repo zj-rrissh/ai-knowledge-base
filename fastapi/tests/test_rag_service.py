@@ -76,13 +76,13 @@ class TestGenerateAnswer:
                     "id": "c2",
                     "text": "content2",
                     "metadata": {"source": "doc.txt"},
-                    "distance": 0.85,
+                    "distance": 0.75,
                 },
             ]
 
             result = generate_answer(query="test")
             assert result.sources[0].score == pytest.approx(0.9)
-            assert result.sources[1].score == pytest.approx(0.15)
+            assert result.sources[1].score == pytest.approx(0.25)
 
     def test_no_results_returns_default_answer(self):
         mock_embed = MagicMock()
