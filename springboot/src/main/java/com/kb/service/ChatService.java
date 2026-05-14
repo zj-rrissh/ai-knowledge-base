@@ -9,6 +9,8 @@ import com.kb.repository.ChatSessionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +45,15 @@ public class ChatService {
 
     @SuppressWarnings("unchecked")
     public ChatMessage sendMessage(Long sessionId, String query, Long userId) {
+        List<ChatMessage> historyMessages = messageRepo.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        List<Map<String, String>> history = new ArrayList<>();
+        for (ChatMessage msg : historyMessages) {
+            Map<String, String> h = new HashMap<>();
+            h.put("role", msg.getRole().name());
+            h.put("content", msg.getContent());
+            history.add(h);
+        }
+
         ChatMessage userMsg = new ChatMessage();
         userMsg.setSessionId(sessionId);
         userMsg.setRole(MessageRole.user);
@@ -50,7 +61,7 @@ public class ChatService {
         messageRepo.save(userMsg);
 
         Map<String, Object> aiResp = fastApiClient.chat(
-                String.valueOf(sessionId), query, userId, 4);
+                String.valueOf(sessionId), query, userId, 4, history);
 
         ChatMessage assistantMsg = new ChatMessage();
         assistantMsg.setSessionId(sessionId);

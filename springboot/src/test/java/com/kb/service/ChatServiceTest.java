@@ -100,7 +100,7 @@ class ChatServiceTest {
         Map<String, Object> aiResp = new HashMap<>();
         aiResp.put("answer", "AI response text");
         aiResp.put("sources", List.of("source1", "source2"));
-        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt())).thenReturn(aiResp);
+        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList())).thenReturn(aiResp);
 
         ChatMessage result = chatService.sendMessage(1L, "Hello", 1L);
 
@@ -112,7 +112,7 @@ class ChatServiceTest {
         assertEquals("Hello", savedMessages.get(0).getContent());
         assertEquals(1L, savedMessages.get(0).getSessionId());
 
-        verify(fastApiClient).chat("1", "Hello", 1L, 4);
+        verify(fastApiClient).chat(eq("1"), eq("Hello"), eq(1L), eq(4), anyList());
 
         assertEquals(MessageRole.assistant, result.getRole());
         assertEquals("AI response text", result.getContent());
@@ -126,7 +126,7 @@ class ChatServiceTest {
         Map<String, Object> aiResp = new HashMap<>();
         aiResp.put("answer", "AI response text");
         aiResp.put("sources", null);
-        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt())).thenReturn(aiResp);
+        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList())).thenReturn(aiResp);
 
         ChatMessage result = chatService.sendMessage(1L, "Hello", 1L);
 

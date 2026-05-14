@@ -60,7 +60,7 @@ class KnowledgeServiceTest {
         Map<String, Object> ingestResp = new HashMap<>();
         ingestResp.put("status", "indexed");
         ingestResp.put("chunk_count", 5);
-        when(fastApiClient.ingest(anyString(), anyLong(), anyLong())).thenReturn(ingestResp);
+        when(fastApiClient.ingest(anyString(), anyLong(), anyLong(), anyString())).thenReturn(ingestResp);
 
         Document result = knowledgeService.upload(file, "Test Title", "Test Desc", "tag1,tag2", 1L);
 
@@ -72,7 +72,7 @@ class KnowledgeServiceTest {
 
         verify(fileStorage).store(any(), eq(1L));
         verify(docRepo, times(2)).save(any(Document.class));
-        verify(fastApiClient).ingest(anyString(), eq(1L), eq(1L));
+        verify(fastApiClient).ingest(anyString(), eq(1L), eq(1L), anyString());
     }
 
     @Test
@@ -91,7 +91,7 @@ class KnowledgeServiceTest {
 
         Map<String, Object> ingestResp = new HashMap<>();
         ingestResp.put("status", "failed");
-        when(fastApiClient.ingest(anyString(), anyLong(), anyLong())).thenReturn(ingestResp);
+        when(fastApiClient.ingest(anyString(), anyLong(), anyLong(), anyString())).thenReturn(ingestResp);
 
         Document result = knowledgeService.upload(file, "Title", null, null, 1L);
 
@@ -112,7 +112,7 @@ class KnowledgeServiceTest {
             return doc;
         });
 
-        when(fastApiClient.ingest(anyString(), anyLong(), anyLong()))
+        when(fastApiClient.ingest(anyString(), anyLong(), anyLong(), anyString()))
                 .thenThrow(new RuntimeException("API unavailable"));
 
         Document result = knowledgeService.upload(file, "Title", null, null, 1L);

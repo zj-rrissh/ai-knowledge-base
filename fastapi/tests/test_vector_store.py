@@ -56,7 +56,7 @@ class TestGetCollection:
 
             result = get_collection(user_id=1)
             mock_gc.return_value.get_or_create_collection.assert_called_once_with(
-                name="kb_1"
+                name="kb_1", metadata={"hnsw:space": "cosine"}
             )
             assert result == mock_collection
 

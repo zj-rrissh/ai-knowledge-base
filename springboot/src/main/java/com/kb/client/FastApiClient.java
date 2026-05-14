@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -29,12 +30,14 @@ public class FastApiClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> chat(String sessionId, String query, Long userId, int topK) {
+    public Map<String, Object> chat(String sessionId, String query, Long userId, int topK,
+                                     List<Map<String, String>> history) {
         Map<String, Object> body = new HashMap<>();
         body.put("session_id", sessionId);
         body.put("query", query);
         body.put("user_id", userId);
         body.put("top_k", topK);
+        body.put("history", history != null ? history : List.of());
         return restTemplate.postForObject(baseUrl + "/chat", body, Map.class);
     }
 

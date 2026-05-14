@@ -12,4 +12,5 @@ def chat(req: ChatRequest):
         query=req.query,
         user_id=req.user_id,
         top_k=req.top_k,
+        history=[h.model_dump() for h in req.history] if req.history else None,
     )

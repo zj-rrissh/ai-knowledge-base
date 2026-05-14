@@ -13,7 +13,7 @@ def _load_prompt(name: str = "default") -> str:
 
 
 def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
-                    min_score: float = 0.2) -> ChatResponse:
+                    min_score: float = 0.2, history: list[dict] | None = None) -> ChatResponse:
     embed_client = get_embedding_client()
     query_embedding = embed_client.embed_query(query)
 
@@ -38,7 +38,7 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
     user_message = query
 
     llm_client = get_llm_client()
-    answer = llm_client.chat(system_prompt=system_prompt, user_message=user_message)
+    answer = llm_client.chat(system_prompt=system_prompt, user_message=user_message, history=history or [])
 
     sources = [
         SourceDocument(
