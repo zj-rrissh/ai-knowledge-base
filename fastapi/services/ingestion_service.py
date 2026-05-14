@@ -2,6 +2,7 @@ import os
 from llama_index.core import SimpleDirectoryReader
 from services.embedding_client import get_embedding_client
 from services.vector_store import add_chunks, delete_chunks
+from services.sparse_retriever import get_sparse_retriever
 from chunking.strategy import get_strategy
 
 
@@ -45,6 +46,10 @@ def ingest_document(file_path: str, document_id: int, user_id: int = 1,
             embeddings=embeddings,
             metadatas=metadatas,
         )
+
+        # 同步写入 BM25 稀疏索引
+        sparse_retriever = get_sparse_retriever(user_id)
+        sparse_retriever.build_index(chunk_texts, metadatas)
 
         return {"status": "indexed", "chunk_count": len(chunk_texts)}
 

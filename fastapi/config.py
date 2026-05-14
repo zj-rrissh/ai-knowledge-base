@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     summary_trigger_rounds: int = 10
     keep_recent_rounds: int = 6
 
+    # ── Retrieval ──
+    hybrid_enabled: bool = True
+    dense_top_k: int = 20
+    sparse_top_k: int = 20
+    rrf_k: int = 60
 
     @property
     def resolved_llm_base_url(self) -> str:

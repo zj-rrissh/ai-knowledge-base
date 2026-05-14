@@ -3,6 +3,7 @@ from models.requests import IngestRequest
 from models.responses import IngestResponse
 from services.ingestion_service import ingest_document
 from services.vector_store import delete_document_chunks
+from services.sparse_retriever import get_sparse_retriever
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
@@ -26,4 +27,6 @@ def ingest(req: IngestRequest):
 @router.delete("/{document_id}")
 def delete_document(document_id: int, user_id: int = 1):
     deleted = delete_document_chunks(user_id=user_id, document_id=document_id)
+    retriever = get_sparse_retriever(user_id)
+    retriever.delete_document(str(document_id))
     return {"document_id": document_id, "status": "deleted", "chunks_removed": deleted}

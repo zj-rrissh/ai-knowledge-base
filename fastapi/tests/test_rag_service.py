@@ -356,6 +356,7 @@ class TestGenerateAnswer:
             patch("services.rag_service.settings") as mock_settings,
         ):
             mock_settings.max_history_rounds = 20
+            mock_settings.hybrid_enabled = False
             mock_query.return_value = [
                 {"id": "c1", "text": "content", "metadata": {"source": "doc.txt"}, "distance": 0.3}
             ]

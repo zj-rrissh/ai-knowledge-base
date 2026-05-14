@@ -6,6 +6,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 
+@pytest.fixture(autouse=True)
+def _disable_hybrid(monkeypatch):
+    """所有测试默认使用纯密集检索，避免 BM25 副作用。"""
+    import config
+    monkeypatch.setattr(config.settings, "hybrid_enabled", False)
+
+
 @pytest.fixture
 def mock_settings(monkeypatch):
     """将 config.settings 的各属性替换为测试安全的值。
@@ -28,6 +35,10 @@ def mock_settings(monkeypatch):
     monkeypatch.setattr(config.settings, "max_history_rounds", 20)
     monkeypatch.setattr(config.settings, "summary_trigger_rounds", 10)
     monkeypatch.setattr(config.settings, "keep_recent_rounds", 6)
+    monkeypatch.setattr(config.settings, "hybrid_enabled", False)
+    monkeypatch.setattr(config.settings, "dense_top_k", 20)
+    monkeypatch.setattr(config.settings, "sparse_top_k", 20)
+    monkeypatch.setattr(config.settings, "rrf_k", 60)
     return config.settings
 
 

@@ -60,14 +60,38 @@ def _summarize_history(
     )
 
 
-def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
-                    min_score: float = 0.2, history: list[dict] | None = None,
-                    summary: str | None = None) -> ChatResponse:
+def _retrieve_chunks(query: str, user_id: int, top_k: int) -> list[dict]:
+    """检索文档块：混合检索（密集+稀疏+RRF）或降级为纯向量检索。"""
     embed_client = get_embedding_client()
     query_embedding = embed_client.embed_query(query)
 
-    chunks = query_chunks(user_id=user_id, query_embedding=query_embedding, top_k=top_k)
-    chunks = [c for c in chunks if 1.0 - c.get("distance", 0) >= min_score]
+    if not settings.hybrid_enabled:
+        return query_chunks(user_id=user_id, query_embedding=query_embedding, top_k=top_k)
+
+    try:
+        from services.sparse_retriever import get_sparse_retriever
+        from services.fusion import rrf_fusion
+
+        dense_results = query_chunks(
+            user_id=user_id, query_embedding=query_embedding, top_k=settings.dense_top_k,
+        )
+        sparse = get_sparse_retriever(user_id)
+        sparse_results = sparse.search(query, top_k=settings.sparse_top_k) if sparse.is_ready() else []
+        return rrf_fusion(dense_results, sparse_results, k=settings.rrf_k, final_top_k=top_k)
+    except Exception:
+        return query_chunks(user_id=user_id, query_embedding=query_embedding, top_k=top_k)
+
+
+def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
+                    min_score: float = 0.2, history: list[dict] | None = None,
+                    summary: str | None = None) -> ChatResponse:
+    chunks = _retrieve_chunks(query, user_id, top_k)
+
+    # 混合检索的 rrf_score 替代 distance 用于过滤；纯向量检索仍用 1.0 - distance
+    chunks = [
+        c for c in chunks
+        if c.get("rrf_score", 1.0 - c.get("distance", 0)) >= min_score
+    ]
 
     if not chunks:
         return ChatResponse(
@@ -101,7 +125,7 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
             if c.get("metadata", {}).get("source", "").startswith("/")
             else c.get("metadata", {}).get("source", "未知"),
             chunk_text=c["text"][:200],
-            score=round(1.0 - c.get("distance", 0), 4),
+            score=round(c.get("rrf_score", 1.0 - c.get("distance", 0)), 4),
         )
         for c in chunks
     ]
