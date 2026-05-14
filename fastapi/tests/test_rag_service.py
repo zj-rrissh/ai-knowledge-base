@@ -171,8 +171,8 @@ class TestGenerateAnswer:
             ]
 
             result = generate_answer(query="test")
-            assert result.sources[0].score == pytest.approx(0.9)
-            assert result.sources[1].score == pytest.approx(0.25)
+            assert result.sources[0].score == pytest.approx(0.95)
+            assert result.sources[1].score == pytest.approx(0.625)
 
     def test_no_results_returns_default_answer(self):
         mock_embed = MagicMock()
@@ -219,7 +219,7 @@ class TestGenerateAnswer:
             assert isinstance(src, SourceDocument)
             assert src.doc_name == "document.pdf"
             assert len(src.chunk_text) == 200
-            assert src.score == pytest.approx(0.95)
+            assert src.score == pytest.approx(0.975)
 
     def test_prompt_template_filled_correctly(self):
         mock_embed = MagicMock()

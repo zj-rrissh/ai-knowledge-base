@@ -87,11 +87,9 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
                     summary: str | None = None) -> ChatResponse:
     chunks = _retrieve_chunks(query, user_id, top_k)
 
-    # 混合检索的 rrf_score 替代 distance 用于过滤；纯向量检索仍用 1.0 - distance
-    chunks = [
-        c for c in chunks
-        if c.get("rrf_score", 1.0 - c.get("distance", 0)) >= min_score
-    ]
+    # RRF 分数量纲（~0.01-0.05）与余弦相似度（0-1）不同，混合检索时不过滤
+    if not settings.hybrid_enabled:
+        chunks = [c for c in chunks if (2.0 - c.get("distance", 0)) / 2.0 >= min_score]
 
     if not chunks:
         return ChatResponse(
@@ -125,7 +123,7 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
             if c.get("metadata", {}).get("source", "").startswith("/")
             else c.get("metadata", {}).get("source", "未知"),
             chunk_text=c["text"][:200],
-            score=round(c.get("rrf_score", 1.0 - c.get("distance", 0)), 4),
+            score=round(c.get("rrf_score", (2.0 - c.get("distance", 0)) / 2.0), 4),
         )
         for c in chunks
     ]

@@ -22,6 +22,7 @@ def ingest_document(file_path: str, document_id: int, user_id: int = 1,
         base_meta = {
             "document_id": str(document_id),
             "source": source_name,
+            "file_path": file_path,
             **(metadata or {}),
         }
 
