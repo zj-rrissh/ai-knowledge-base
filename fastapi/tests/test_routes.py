@@ -100,3 +100,60 @@ class TestChatEndpoint:
             json={"session_id": "sess-1", "query": "hi", "top_k": 25},
         )
         assert response.status_code == 422
+
+    def test_chat_with_summary(self, test_app):
+        with patch(
+            "routes.chat.generate_answer",
+            return_value=ChatResponse(answer="AI 回答", sources=[]),
+        ) as mock_gen:
+            response = test_app.post(
+                "/chat",
+                json={
+                    "session_id": "sess-1",
+                    "query": "继续",
+                    "summary": "之前的对话摘要",
+                },
+            )
+            assert response.status_code == 200
+            call_kwargs = mock_gen.call_args[1]
+            assert call_kwargs["summary"] == "之前的对话摘要"
+
+
+class TestSummarizeEndpoint:
+    def test_summarize_returns_summary(self, test_app):
+        with patch(
+            "routes.chat._summarize_history",
+            return_value="Generated summary text",
+        ):
+            response = test_app.post(
+                "/chat/summarize",
+                json={
+                    "session_id": "sess-1",
+                    "history": [
+                        {"role": "user", "content": "Hello"},
+                        {"role": "assistant", "content": "Hi there"},
+                    ],
+                },
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["summary"] == "Generated summary text"
+
+    def test_summarize_empty_history(self, test_app):
+        with patch(
+            "routes.chat._summarize_history",
+            return_value="",
+        ):
+            response = test_app.post(
+                "/chat/summarize",
+                json={"session_id": "sess-1", "history": []},
+            )
+            assert response.status_code == 200
+            assert response.json()["summary"] == ""
+
+    def test_summarize_missing_session_id(self, test_app):
+        response = test_app.post(
+            "/chat/summarize",
+            json={"history": []},
+        )
+        assert response.status_code == 422

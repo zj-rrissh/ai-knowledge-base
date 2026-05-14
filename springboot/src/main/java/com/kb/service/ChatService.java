@@ -19,13 +19,15 @@ public class ChatService {
     private final ChatSessionRepository sessionRepo;
     private final ChatMessageRepository messageRepo;
     private final FastApiClient fastApiClient;
+    private final SummaryService summaryService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ChatService(ChatSessionRepository sessionRepo, ChatMessageRepository messageRepo,
-                       FastApiClient fastApiClient) {
+                       FastApiClient fastApiClient, SummaryService summaryService) {
         this.sessionRepo = sessionRepo;
         this.messageRepo = messageRepo;
         this.fastApiClient = fastApiClient;
+        this.summaryService = summaryService;
     }
 
     public ChatSession createSession(Long userId, String title) {
@@ -45,6 +47,11 @@ public class ChatService {
 
     @SuppressWarnings("unchecked")
     public ChatMessage sendMessage(Long sessionId, String query, Long userId) {
+        ChatSession session = sessionRepo.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Session not found: " + sessionId));
+        String cachedSummary = session.getSummary();
+
         List<ChatMessage> historyMessages = messageRepo.findBySessionIdOrderByCreatedAtAsc(sessionId);
         List<Map<String, String>> history = new ArrayList<>();
         for (ChatMessage msg : historyMessages) {
@@ -61,7 +68,7 @@ public class ChatService {
         messageRepo.save(userMsg);
 
         Map<String, Object> aiResp = fastApiClient.chat(
-                String.valueOf(sessionId), query, userId, 4, history);
+                String.valueOf(sessionId), query, userId, 4, history, cachedSummary);
 
         ChatMessage assistantMsg = new ChatMessage();
         assistantMsg.setSessionId(sessionId);
@@ -73,7 +80,11 @@ public class ChatService {
             assistantMsg.setSourceDocs(objectMapper.writeValueAsString(sources));
         } catch (Exception ignored) {}
 
-        return messageRepo.save(assistantMsg);
+        ChatMessage saved = messageRepo.save(assistantMsg);
+
+        summaryService.updateSummary(sessionId);
+
+        return saved;
     }
 
     public List<ChatMessage> listMessages(Long sessionId) {

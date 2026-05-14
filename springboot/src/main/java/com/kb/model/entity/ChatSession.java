@@ -24,6 +24,9 @@ public class ChatSession {
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

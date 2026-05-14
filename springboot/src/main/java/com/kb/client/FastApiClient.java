@@ -31,14 +31,27 @@ public class FastApiClient {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> chat(String sessionId, String query, Long userId, int topK,
-                                     List<Map<String, String>> history) {
+                                     List<Map<String, String>> history, String summary) {
         Map<String, Object> body = new HashMap<>();
         body.put("session_id", sessionId);
         body.put("query", query);
         body.put("user_id", userId);
         body.put("top_k", topK);
         body.put("history", history != null ? history : List.of());
+        if (summary != null) {
+            body.put("summary", summary);
+        }
         return restTemplate.postForObject(baseUrl + "/chat", body, Map.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public String summarize(String sessionId, List<Map<String, String>> history) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("session_id", sessionId);
+        body.put("history", history != null ? history : List.of());
+        Map<String, Object> response = restTemplate.postForObject(
+                baseUrl + "/chat/summarize", body, Map.class);
+        return (String) response.get("summary");
     }
 
     public void deleteChunks(Long documentId, Long userId) {

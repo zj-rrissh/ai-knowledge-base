@@ -20,6 +20,10 @@ class ChatResponse(BaseModel):
     sources: list[SourceDocument]
 
 
+class SummarizeResponse(BaseModel):
+    summary: str = Field(..., description="生成的对话摘要")
+
+
 class HealthResponse(BaseModel):
     status: str
     chromadb: Literal["connected", "disconnected"]

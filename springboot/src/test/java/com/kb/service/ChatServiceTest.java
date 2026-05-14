@@ -30,6 +30,8 @@ class ChatServiceTest {
     private ChatMessageRepository messageRepo;
     @Mock
     private FastApiClient fastApiClient;
+    @Mock
+    private SummaryService summaryService;
 
     @InjectMocks
     private ChatService chatService;
@@ -87,6 +89,11 @@ class ChatServiceTest {
 
     @Test
     void sendMessage_ShouldSaveUserMessageCallFastApiAndSaveAssistantMessage() {
+        ChatSession session = new ChatSession();
+        session.setId(1L);
+        session.setSummary("cached summary");
+        when(sessionRepo.findById(1L)).thenReturn(java.util.Optional.of(session));
+
         when(messageRepo.save(any(ChatMessage.class))).thenAnswer(invocation -> {
             ChatMessage msg = invocation.getArgument(0);
             if (msg.getRole() == MessageRole.user) {
@@ -100,7 +107,8 @@ class ChatServiceTest {
         Map<String, Object> aiResp = new HashMap<>();
         aiResp.put("answer", "AI response text");
         aiResp.put("sources", List.of("source1", "source2"));
-        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList())).thenReturn(aiResp);
+        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList(), any()))
+                .thenReturn(aiResp);
 
         ChatMessage result = chatService.sendMessage(1L, "Hello", 1L);
 
@@ -112,7 +120,8 @@ class ChatServiceTest {
         assertEquals("Hello", savedMessages.get(0).getContent());
         assertEquals(1L, savedMessages.get(0).getSessionId());
 
-        verify(fastApiClient).chat(eq("1"), eq("Hello"), eq(1L), eq(4), anyList());
+        verify(fastApiClient).chat(eq("1"), eq("Hello"), eq(1L), eq(4), anyList(), eq("cached summary"));
+        verify(summaryService).updateSummary(1L);
 
         assertEquals(MessageRole.assistant, result.getRole());
         assertEquals("AI response text", result.getContent());
@@ -121,16 +130,41 @@ class ChatServiceTest {
 
     @Test
     void sendMessage_ShouldHandleNullSources() {
+        ChatSession session = new ChatSession();
+        session.setId(1L);
+        when(sessionRepo.findById(1L)).thenReturn(java.util.Optional.of(session));
+
         when(messageRepo.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Map<String, Object> aiResp = new HashMap<>();
         aiResp.put("answer", "AI response text");
         aiResp.put("sources", null);
-        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList())).thenReturn(aiResp);
+        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList(), any()))
+                .thenReturn(aiResp);
 
         ChatMessage result = chatService.sendMessage(1L, "Hello", 1L);
 
         assertEquals("AI response text", result.getContent());
+        verify(summaryService).updateSummary(1L);
+    }
+
+    @Test
+    void sendMessage_ShouldPassNullSummary_WhenSessionHasNoSummary() {
+        ChatSession session = new ChatSession();
+        session.setId(1L);
+        when(sessionRepo.findById(1L)).thenReturn(java.util.Optional.of(session));
+
+        when(messageRepo.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Map<String, Object> aiResp = new HashMap<>();
+        aiResp.put("answer", "AI response");
+        when(fastApiClient.chat(anyString(), anyString(), anyLong(), anyInt(), anyList(), isNull()))
+                .thenReturn(aiResp);
+
+        chatService.sendMessage(1L, "Hello", 1L);
+
+        verify(fastApiClient).chat(eq("1"), eq("Hello"), eq(1L), eq(4), anyList(), isNull());
+        verify(summaryService).updateSummary(1L);
     }
 
     @Test

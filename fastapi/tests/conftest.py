@@ -25,6 +25,9 @@ def mock_settings(monkeypatch):
     monkeypatch.setattr(config.settings, "chroma_persist_dir", "/tmp/test_chroma")
     monkeypatch.setattr(config.settings, "chunk_size", 512)
     monkeypatch.setattr(config.settings, "chunk_overlap", 50)
+    monkeypatch.setattr(config.settings, "max_history_rounds", 20)
+    monkeypatch.setattr(config.settings, "summary_trigger_rounds", 10)
+    monkeypatch.setattr(config.settings, "keep_recent_rounds", 6)
     return config.settings
 
 

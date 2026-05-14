@@ -3,6 +3,7 @@ from services.llm_client import get_llm_client
 from services.embedding_client import get_embedding_client
 from services.vector_store import query_chunks
 from models.responses import ChatResponse, SourceDocument
+from config import settings
 
 _PROMPT_DIR = os.path.join(os.path.dirname(__file__), "..", "prompts")
 
@@ -12,8 +13,56 @@ def _load_prompt(name: str = "default") -> str:
         return f.read()
 
 
+def _apply_history_window(
+    history: list[dict],
+    max_rounds: int | None = None,
+) -> list[dict]:
+    """滑动窗口截断：仅保留最近 N 轮对话。"""
+    if not history:
+        return history
+    max_rounds = max_rounds or settings.max_history_rounds
+
+    user_count = sum(1 for h in history if h.get("role") == "user")
+    if user_count <= max_rounds:
+        return history
+
+    users_to_skip = user_count - max_rounds
+    users_seen = 0
+    cutoff_idx = 0
+    for i, h in enumerate(history):
+        if h.get("role") == "user":
+            users_seen += 1
+            if users_seen == users_to_skip + 1:
+                cutoff_idx = i
+                break
+
+    return history[cutoff_idx:]
+
+
+def _summarize_history(
+    history: list[dict],
+    llm_client=None,
+) -> str:
+    """使用 LLM 对历史对话生成摘要。"""
+    if llm_client is None:
+        llm_client = get_llm_client()
+
+    lines = []
+    for h in history:
+        role = "用户" if h.get("role") == "user" else ("AI" if h.get("role") == "assistant" else "系统")
+        lines.append(f"{role}: {h.get('content', '')}")
+    history_text = "\n".join(lines)
+
+    summary_prompt = _load_prompt("summary").format(history=history_text)
+    return llm_client.chat(
+        system_prompt="你是一个对话摘要助手。",
+        user_message=summary_prompt,
+    )
+
+
 def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
-                    min_score: float = 0.2, history: list[dict] | None = None) -> ChatResponse:
+                    min_score: float = 0.2, history: list[dict] | None = None,
+                    summary: str | None = None) -> ChatResponse:
     embed_client = get_embedding_client()
     query_embedding = embed_client.embed_query(query)
 
@@ -38,7 +87,13 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
     user_message = query
 
     llm_client = get_llm_client()
-    answer = llm_client.chat(system_prompt=system_prompt, user_message=user_message, history=history or [])
+    history = _apply_history_window(history or [])
+    if summary:
+        history = [
+            {"role": "system", "content": f"以下是历史对话摘要：\n{summary}"},
+            *history,
+        ]
+    answer = llm_client.chat(system_prompt=system_prompt, user_message=user_message, history=history)
 
     sources = [
         SourceDocument(

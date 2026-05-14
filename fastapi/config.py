@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     chunk_size: int = 512
     chunk_overlap: int = 50
 
+    # ── Chat History ──
+    max_history_rounds: int = 20
+    summary_trigger_rounds: int = 10
+    keep_recent_rounds: int = 6
+
+
     @property
     def resolved_llm_base_url(self) -> str:
         """Return the explicitly configured base URL or fall back to the provider default."""
