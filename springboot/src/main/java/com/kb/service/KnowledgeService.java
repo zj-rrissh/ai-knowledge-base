@@ -46,7 +46,7 @@ public class KnowledgeService {
         doc = docRepo.save(doc);
 
         try {
-            Map<String, Object> resp = fastApiClient.ingest(filePath, doc.getId(), userId);
+            Map<String, Object> resp = fastApiClient.ingest(filePath, doc.getId(), userId, doc.getTitle());
             if ("indexed".equals(resp.get("status"))) {
                 doc.setStatus(DocStatus.indexed);
                 doc.setChunkCount((Integer) resp.get("chunk_count"));

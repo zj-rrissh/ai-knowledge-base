@@ -18,11 +18,13 @@ public class FastApiClient {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> ingest(String filePath, Long documentId, Long userId) {
+    public Map<String, Object> ingest(String filePath, Long documentId, Long userId,
+                                      String title) {
         Map<String, Object> body = new HashMap<>();
         body.put("file_path", filePath);
         body.put("document_id", documentId);
         body.put("user_id", userId);
+        body.put("metadata", Map.of("title", title != null ? title : ""));
         return restTemplate.postForObject(baseUrl + "/ingest", body, Map.class);
     }
 

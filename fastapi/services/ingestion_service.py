@@ -1,3 +1,4 @@
+import os
 from llama_index.core import SimpleDirectoryReader
 from services.embedding_client import get_embedding_client
 from services.vector_store import add_chunks, delete_chunks
@@ -16,9 +17,10 @@ def ingest_document(file_path: str, document_id: int, user_id: int = 1,
 
         full_text = "\n\n".join(doc.get_content() for doc in docs)
 
+        source_name = (metadata or {}).get("title") or os.path.basename(file_path)
         base_meta = {
             "document_id": str(document_id),
-            "source": file_path,
+            "source": source_name,
             **(metadata or {}),
         }
 

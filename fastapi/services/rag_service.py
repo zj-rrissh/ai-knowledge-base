@@ -28,7 +28,8 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
 
     context_parts = []
     for c in chunks:
-        doc_name = c.get("metadata", {}).get("source", "未知文档")
+        raw_name = c.get("metadata", {}).get("source", "未知文档")
+        doc_name = os.path.basename(raw_name) if raw_name.startswith("/") else raw_name
         context_parts.append(f"[文档: {doc_name}]\n{c['text']}")
     context = "\n\n---\n\n".join(context_parts)
 
@@ -41,7 +42,9 @@ def generate_answer(query: str, user_id: int = 1, top_k: int = 4,
 
     sources = [
         SourceDocument(
-            doc_name=c.get("metadata", {}).get("source", "未知"),
+            doc_name=os.path.basename(c.get("metadata", {}).get("source", "未知"))
+            if c.get("metadata", {}).get("source", "").startswith("/")
+            else c.get("metadata", {}).get("source", "未知"),
             chunk_text=c["text"][:200],
             score=round(1.0 - c.get("distance", 0), 4),
         )
