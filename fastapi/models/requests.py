@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field
 
 
+class MetadataRequest(BaseModel):
+    file_path: str = Field(..., description="已保存到磁盘的文件绝对路径")
+    filename: str | None = Field(default=None, description="原始文件名，用于 LLM 上下文")
+
+
 class IngestRequest(BaseModel):
     file_path: str = Field(..., description="文件绝对路径")
     document_id: int = Field(..., description="SpringBoot 侧的文档 ID")

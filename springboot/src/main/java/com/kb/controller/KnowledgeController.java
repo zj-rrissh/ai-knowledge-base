@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,6 +40,17 @@ public class KnowledgeController {
             Authentication auth) {
         Long userId = Long.parseLong(auth.getPrincipal().toString());
         return ResponseEntity.ok(knowledgeService.list(userId, page, size));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<?> batchUpload(@RequestParam("files") MultipartFile[] files,
+                                          Authentication auth) throws IOException {
+        if (files.length > 5) {
+            return ResponseEntity.badRequest().body(Map.of("error", "一次最多上传 5 个文件"));
+        }
+        Long userId = Long.parseLong(auth.getPrincipal().toString());
+        List<Document> results = knowledgeService.batchUpload(Arrays.asList(files), userId);
+        return ResponseEntity.ok(results);
     }
 
     @DeleteMapping("/documents/{id}")

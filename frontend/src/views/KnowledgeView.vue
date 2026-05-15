@@ -24,68 +24,41 @@
       <section class="upload-card">
         <div class="card-header">
           <h2>添加文档</h2>
-          <p class="card-subtitle">上传文件并填写信息，系统将自动解析与向量化</p>
+          <p class="card-subtitle">一次最多选择 5 个文件，AI 将自动生成标题和标签</p>
         </div>
-        <form class="upload-form" @submit.prevent="handleSubmit">
-          <div class="form-grid">
-            <div class="form-group span-full">
-              <label for="doc-title">文档标题 <span class="required">*</span></label>
-              <input
-                id="doc-title"
-                v-model="form.title"
-                type="text"
-                placeholder="输入文档标题..."
-                required
-                maxlength="200"
-                class="form-input"
-              />
-            </div>
-            <div class="form-group span-full">
-              <label for="doc-desc">描述</label>
-              <textarea
-                id="doc-desc"
-                v-model="form.description"
-                placeholder="简要描述文档内容..."
-                rows="2"
-                maxlength="500"
-                class="form-textarea"
-              ></textarea>
-            </div>
-            <div class="form-group">
-              <label for="doc-tags">标签</label>
-              <input
-                id="doc-tags"
-                v-model="form.tags"
-                type="text"
-                placeholder="逗号分隔，如：技术,Python"
-                maxlength="500"
-                class="form-input"
-              />
-            </div>
-            <div class="form-group file-group">
-              <label>文件 <span class="required">*</span></label>
-              <div class="file-selector" :class="{ 'has-file': selectedFile }">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept=".pdf,.md,.txt"
-                  @change="onFileChange"
-                  class="file-input-hidden"
-                />
-                <button type="button" @click="$refs.fileInput.click()" class="file-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-                  </svg>
-                  {{ selectedFile ? selectedFile.name : '选择文件' }}
-                </button>
-                <span v-if="selectedFile" class="file-size">{{ formatSize(selectedFile.size) }}</span>
-                <button v-if="selectedFile" type="button" @click="clearFile" class="file-clear">&times;</button>
-                <span v-else class="file-hint">支持 PDF、Markdown、TXT</span>
-              </div>
-            </div>
+        <div class="upload-form">
+          <div class="file-selector" :class="{ 'has-files': selectedFiles.length }">
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".pdf,.md,.txt"
+              multiple
+              @change="onFilesChange"
+              class="file-input-hidden"
+            />
+            <button type="button" @click="$refs.fileInput.click()" class="file-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+              {{ selectedFiles.length ? '添加更多文件' : '选择文件' }}
+            </button>
+            <span v-if="!selectedFiles.length" class="file-hint">支持 PDF、Markdown、TXT</span>
+            <button v-if="selectedFiles.length" type="button" @click="clearFiles" class="file-clear">清空</button>
           </div>
+
+          <ul v-if="selectedFiles.length" class="file-list">
+            <li v-for="(file, idx) in selectedFiles" :key="idx" class="file-item">
+              <svg class="file-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <span class="file-item-name">{{ file.name }}</span>
+              <span class="file-item-size">{{ formatSize(file.size) }}</span>
+            </li>
+          </ul>
+
           <div class="form-actions">
-            <button type="submit" class="submit-btn" :disabled="uploading || !form.title || !selectedFile">
+            <button class="submit-btn" :disabled="uploading || !selectedFiles.length" @click="handleBatchSubmit">
               <svg v-if="uploading" class="spinner" viewBox="0 0 24 24" fill="none" width="16" height="16">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/>
                 <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
@@ -95,11 +68,11 @@
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              {{ uploading ? '上传中...' : '上传文档' }}
+              {{ uploading ? '上传中...' : `上传全部 (${selectedFiles.length}/5)` }}
             </button>
             <p v-if="uploadError" class="form-error">{{ uploadError }}</p>
           </div>
-        </form>
+        </div>
       </section>
 
       <section class="docs-section">
@@ -171,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { knowledge } from '../api/index.js'
 
 const documents = ref([])
@@ -180,13 +153,7 @@ const loading = ref(false)
 const uploading = ref(false)
 const uploadError = ref('')
 const deleting = ref(null)
-const selectedFile = ref(null)
-
-const form = reactive({
-  title: '',
-  description: '',
-  tags: '',
-})
+const selectedFiles = ref([])
 
 async function loadDocs() {
   loading.value = true
@@ -200,30 +167,28 @@ async function loadDocs() {
   }
 }
 
-function onFileChange(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  selectedFile.value = file
-  if (!form.title) {
-    form.title = file.name.replace(/\.[^.]+$/, '')
+function onFilesChange(e) {
+  const files = Array.from(e.target.files || [])
+  if (files.length > 5) {
+    uploadError.value = '一次最多选择 5 个文件'
+    return
   }
+  uploadError.value = ''
+  selectedFiles.value = files
 }
 
-function clearFile() {
-  selectedFile.value = null
+function clearFiles() {
+  selectedFiles.value = []
   if (fileInput.value) fileInput.value.value = ''
 }
 
-async function handleSubmit() {
-  if (!form.title || !selectedFile.value) return
+async function handleBatchSubmit() {
+  if (!selectedFiles.value.length) return
   uploading.value = true
   uploadError.value = ''
   try {
-    await knowledge.upload(selectedFile.value, form.title, form.description, form.tags)
-    form.title = ''
-    form.description = ''
-    form.tags = ''
-    clearFile()
+    await knowledge.batchUpload(selectedFiles.value)
+    clearFiles()
     await loadDocs()
   } catch {
     uploadError.value = '上传失败，请重试'
@@ -444,7 +409,7 @@ onMounted(loadDocs)
   transition: all 0.2s;
   min-height: 44px;
 }
-.file-selector.has-file {
+.file-selector.has-files {
   border-color: #6366f1;
   border-style: solid;
   background: rgba(99, 102, 241, 0.02);
@@ -492,6 +457,43 @@ onMounted(loadDocs)
   flex-shrink: 0;
 }
 .file-clear:hover { color: #e04e5a; }
+
+/* File list */
+.file-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fafafc;
+  border: 1px solid #f0f0f5;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+.file-item:last-child { margin-bottom: 0; }
+
+.file-item-icon { color: #6366f1; flex-shrink: 0; }
+
+.file-item-name {
+  flex: 1;
+  color: #2d2d3a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-item-size {
+  color: #8c8c9a;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
 
 .file-hint {
   font-size: 0.8rem;

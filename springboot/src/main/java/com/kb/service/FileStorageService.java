@@ -43,7 +43,7 @@ public class FileStorageService {
         String ext = getExtension(file.getOriginalFilename());
         String storedName = UUID.randomUUID().toString() + ext;
         Path targetPath = userDir.resolve(storedName);
-        file.transferTo(targetPath.toFile());
+        Files.copy(file.getInputStream(), targetPath);
 
         return targetPath.toString();
     }

@@ -58,4 +58,12 @@ public class FastApiClient {
         String url = baseUrl + "/ingest/" + documentId + "?user_id=" + userId;
         restTemplate.delete(url);
     }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> generateMetadata(String filePath, String filename) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("file_path", filePath);
+        body.put("filename", filename);
+        return restTemplate.postForObject(baseUrl + "/metadata/generate", body, Map.class);
+    }
 }

@@ -36,6 +36,11 @@ export const knowledge = {
     if (tags) fd.append('tags', tags)
     return api.post('/knowledge/documents', fd)
   },
+  batchUpload: (files) => {
+    const fd = new FormData()
+    files.forEach((f) => fd.append('files', f))
+    return api.post('/knowledge/batch', fd, { timeout: 300000 })
+  },
   list: (page = 0, size = 20) => api.get('/knowledge/documents', { params: { page, size } }),
   delete: (id) => api.delete(`/knowledge/documents/${id}`),
 }

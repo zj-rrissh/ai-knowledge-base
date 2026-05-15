@@ -24,6 +24,12 @@ class SummarizeResponse(BaseModel):
     summary: str = Field(..., description="生成的对话摘要")
 
 
+class MetadataResponse(BaseModel):
+    title: str = Field(..., description="AI 生成的文档标题")
+    description: str = Field(default="", description="AI 生成的文档描述")
+    tags: str = Field(default="", description="逗号分隔的标签")
+
+
 class HealthResponse(BaseModel):
     status: str
     chromadb: Literal["connected", "disconnected"]

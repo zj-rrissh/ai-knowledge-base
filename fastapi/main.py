@@ -29,3 +29,9 @@ try:
     app.include_router(health_router)
 except ImportError:
     pass
+
+try:
+    from routes.metadata import router as metadata_router
+    app.include_router(metadata_router)
+except ImportError:
+    pass
