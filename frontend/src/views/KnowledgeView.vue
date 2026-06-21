@@ -232,32 +232,28 @@ onMounted(loadDocs)
 <style scoped>
 .knowledge-page {
   min-height: 100vh;
-  background: #f9f7f4;
-  background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(26, 26, 46, 0.02) 0%, transparent 50%);
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  color: #2d2d3a;
+  background: transparent;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
 /* ── Header ── */
 .page-header {
-  background: #1a1a2e;
-  background-image:
-    linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-    linear-gradient(to bottom, rgba(255,255,255,0.02), transparent);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.6);
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: var(--shadow-sm);
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 32px;
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -267,18 +263,18 @@ onMounted(loadDocs)
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #fff;
+  color: var(--text-h);
 }
 
 .brand-icon {
-  width: 22px;
-  height: 22px;
-  opacity: 0.7;
+  width: 24px;
+  height: 24px;
+  color: var(--accent);
 }
 
 .header-brand h1 {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.35rem;
+  font-family: var(--display);
+  font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   margin: 0;
@@ -288,17 +284,17 @@ onMounted(loadDocs)
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: rgba(255,255,255,0.7);
+  color: var(--text);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 .nav-link:hover {
-  color: #fff;
-  background: rgba(255,255,255,0.08);
+  color: var(--accent);
+  background: var(--surface-alt);
 }
 
 /* ── Body ── */
@@ -310,13 +306,17 @@ onMounted(loadDocs)
 
 /* ── Upload Card ── */
 .upload-card {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 12px;
-  box-shadow:
-    0 1px 3px rgba(0,0,0,0.03),
-    0 4px 16px rgba(0,0,0,0.04);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
+  transition: transform 0.2s;
+}
+.upload-card:hover {
+  transform: translateY(-2px);
 }
 
 .card-header {
@@ -324,17 +324,17 @@ onMounted(loadDocs)
 }
 
 .card-header h2 {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 4px;
-  color: #1a1a2e;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--text-h);
 }
 
 .card-subtitle {
   margin: 0;
-  font-size: 0.875rem;
-  color: #8c8c9a;
+  font-size: 0.9rem;
+  color: var(--text);
 }
 
 .upload-form {
@@ -401,18 +401,22 @@ onMounted(loadDocs)
 .file-selector {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px dashed #d4d4de;
-  border-radius: 8px;
-  background: #fafafc;
+  gap: 12px;
+  padding: 24px;
+  border: 2px dashed rgba(99, 102, 241, 0.4);
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.02);
   transition: all 0.2s;
-  min-height: 44px;
+  min-height: 60px;
+}
+.file-selector:hover {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.05);
 }
 .file-selector.has-files {
-  border-color: #6366f1;
+  border-color: var(--accent);
   border-style: solid;
-  background: rgba(99, 102, 241, 0.02);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .file-input-hidden { display: none; }
@@ -420,24 +424,24 @@ onMounted(loadDocs)
 .file-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #f0f0f5;
-  border: 1px solid #e2e2ea;
-  border-radius: 6px;
-  color: #5b5b6e;
-  font-size: 0.85rem;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-h);
+  font-size: 0.9rem;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 320px;
-  transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
 }
 .file-btn:hover {
-  background: #e8e8f0;
-  border-color: #6366f1;
+  background: var(--surface-alt);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .file-size {
@@ -512,24 +516,27 @@ onMounted(loadDocs)
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 24px;
-  background: #1a1a2e;
+  padding: 12px 28px;
+  background: var(--accent-gradient);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  font-family: var(--display);
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .submit-btn:hover:not(:disabled) {
-  background: #2a2a44;
-  box-shadow: 0 4px 12px rgba(26, 26, 46, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
 .submit-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .form-error {
@@ -609,10 +616,12 @@ onMounted(loadDocs)
 
 /* Table */
 .docs-table-wrap {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.04);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 

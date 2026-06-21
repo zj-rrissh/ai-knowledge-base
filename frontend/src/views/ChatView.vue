@@ -361,9 +361,9 @@ async function handleDeleteSession(id) {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: #f8fafc;
-  color: #1e293b;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: transparent;
+  color: var(--text-h);
+  font-family: var(--sans);
 }
 
 /* ===== 侧边栏 ===== */
@@ -371,8 +371,10 @@ async function handleDeleteSession(id) {
   position: relative;
   width: 280px;
   min-width: 280px;
-  background: #f1f5f9;
-  border-right: 1px solid #e2e8f0;
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: column;
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
@@ -500,6 +502,7 @@ async function handleDeleteSession(id) {
   font-size: 14px;
   transition: all 0.12s;
   margin-bottom: 2px;
+  position: relative;
 }
 .session-item:hover {
   background: #e2e8f0;
@@ -522,10 +525,12 @@ async function handleDeleteSession(id) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-right: 20px; /* Leave space for floating button on hover */
 }
 
 .session-delete {
-  flex-shrink: 0;
+  position: absolute;
+  right: 6px;
   width: 24px;
   height: 24px;
   display: flex;
@@ -537,10 +542,12 @@ async function handleDeleteSession(id) {
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
-  transition: all 0.12s;
+  transform: translateX(5px);
+  transition: all 0.2s ease;
 }
 .session-item:hover .session-delete {
   opacity: 1;
+  transform: translateX(0);
 }
 .session-delete:hover {
   background: #fee2e2;
@@ -609,7 +616,7 @@ async function handleDeleteSession(id) {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background: #ffffff;
+  background: transparent;
 }
 
 /* ===== 欢迎页 ===== */
@@ -737,15 +744,18 @@ async function handleDeleteSession(id) {
 }
 
 .msg-bubble.user .msg-content {
-  background: #6366f1;
+  background: var(--accent-gradient);
   color: white;
   border-bottom-right-radius: 4px;
+  box-shadow: var(--shadow-sm);
 }
 
 .msg-bubble.assistant .msg-content {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--surface);
+  color: var(--text-h);
   border-bottom-left-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-md);
 }
 
 /* 打字动画 */
@@ -841,15 +851,19 @@ async function handleDeleteSession(id) {
 
 .input-wrapper {
   flex: 1;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
-  transition: border-color 0.15s;
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .input-wrapper:focus-within {
-  border-color: #6366f1;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 4px var(--accent-light), var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .chat-input {
@@ -873,18 +887,19 @@ async function handleDeleteSession(id) {
 }
 
 .send-btn {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  background: #6366f1;
+  background: var(--accent-gradient);
   color: white;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.15s;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .send-btn:hover:not(:disabled) {
   background: #4f46e5;

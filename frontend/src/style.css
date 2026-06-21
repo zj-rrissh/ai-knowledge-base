@@ -1,20 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
+  /* Core Colors */
   --text: #475569;
-  --text-h: #1e293b;
-  --bg: #ffffff;
-  --border: #e2e8f0;
+  --text-h: #0f172a;
+  --bg: #f8fafc;
+  --border: rgba(226, 232, 240, 0.8);
+  
+  /* Accents */
   --accent: #6366f1;
   --accent-hover: #4f46e5;
-  --accent-bg: rgba(99, 102, 241, 0.08);
-  --surface: #f8fafc;
+  --accent-light: #e0e7ff;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  
+  /* Surfaces */
+  --surface: #ffffff;
   --surface-alt: #f1f5f9;
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 4px 20px rgba(99, 102, 241, 0.3);
 
+  /* Typography */
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Outfit', var(--sans);
   --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
 
-  font: 15px/1.5 var(--sans);
+  font: 15px/1.6 var(--sans);
   color-scheme: light;
   color: var(--text);
   background: var(--bg);
@@ -32,6 +47,11 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  /* Add a subtle, premium dynamic gradient background globally */
+  background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 40%),
+              radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.05), transparent 40%),
+              var(--bg);
 }
 
 #app {
@@ -39,40 +59,73 @@ body {
   min-height: 100vh;
 }
 
-h1, h2, h3 {
-  font-family: var(--sans);
+h1, h2, h3, h4, h5 {
+  font-family: var(--display);
   font-weight: 600;
   color: var(--text-h);
+  letter-spacing: -0.02em;
 }
 
 code {
   font-family: var(--mono);
   font-size: 13px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 3px 6px;
+  border-radius: 6px;
   background: var(--surface-alt);
-  color: var(--text-h);
+  color: #c026d3;
 }
 
 a {
   color: var(--accent);
   text-decoration: none;
+  transition: color 0.2s;
 }
 a:hover {
   color: var(--accent-hover);
 }
 
-/* 滚动条美化 */
+/* Scrollbar Beautification */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(148, 163, 184, 0.4);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(148, 163, 184, 0.7);
+}
+
+/* Utility Classes */
+.glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-md);
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.slide-up {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

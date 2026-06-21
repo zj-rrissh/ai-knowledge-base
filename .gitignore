@@ -33,3 +33,10 @@ frontend/coverage/
 fastapi/chroma_data/
 test-files/
 uploads/
+
+# Reasonix
+.reasonix/
+REASONIX.md
+
+# claude
+.claude

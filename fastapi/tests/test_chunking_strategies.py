@@ -103,6 +103,45 @@ class TestParagraphChunkingStrategy:
         assert chunks[0].metadata["source"] == "doc.txt"
         assert chunks[0].metadata["document_id"] == "1"
 
+    # ── 中文句边界优化专用用例 ─────────────────────────────────────
+
+    def test_chinese_sentence_boundary_split(self):
+        """中文句号（。）作句子边界，句子不被截断。"""
+        strategy = ParagraphChunkingStrategy(chunk_size=20, chunk_overlap=0)
+        text = "强化学习是一种机器学习范式。智能体通过与环境交互来学习。奖励信号驱动策略优化。"
+        chunks = strategy.chunk(text)
+        assert len(chunks) == 3
+        assert all(c.text.endswith("。") for c in chunks)
+
+    def test_chinese_mixed_punctuation_split(self):
+        """中文多种句末标点（？！；。）均作边界。"""
+        strategy = ParagraphChunkingStrategy(chunk_size=10, chunk_overlap=0)
+        text = "这是第一句？这是第二句！这是第三句；这是第四句。"
+        chunks = strategy.chunk(text)
+        # 每个句子 6 字，chunk_size=10 放不下两句（含空格 13），所以 4 个块
+        assert len(chunks) == 4
+
+    def test_chinese_and_english_mixed(self):
+        """中英文混排段落：中文句号优先分隔。"""
+        strategy = ParagraphChunkingStrategy(chunk_size=35, chunk_overlap=0)
+        text = "本文介绍Transformer架构。It is based on self-attention。该机制效果显著。"
+        chunks = strategy.chunk(text)
+        assert len(chunks) == 3
+
+    def test_pure_english_fallback(self):
+        """纯英文文档走 English split 兜底。"""
+        strategy = ParagraphChunkingStrategy(chunk_size=30, chunk_overlap=0)
+        text = "Hello world. This is a test. Split at sentences. Each one is short."
+        chunks = strategy.chunk(text)
+        assert len(chunks) >= 3
+
+    def test_no_punctuation_hard_split(self):
+        """无标点时按字符数硬切。"""
+        strategy = ParagraphChunkingStrategy(chunk_size=20, chunk_overlap=0)
+        text = "这是一个完全没有标点符号的超长字符串用来测试硬切分的兜底逻辑" * 3
+        chunks = strategy.chunk(text)
+        assert len(chunks) >= 3
+
 
 class TestMarkdownChunkingStrategy:
     def test_splits_at_headings(self):
